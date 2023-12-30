@@ -42,7 +42,7 @@ client.on('message', (topic, payload) => {
 mqttReq.response("v1/logging/read", payload => {
     payload = JSON.parse(payload)
 
-    let query = "select id, topic, payload from public.logs order by id desc";
+    let query = "select id, timestamp, topic, payload from public.logs order by id desc";
     let params = [];
 
     if (payload.offset) {

@@ -1,6 +1,7 @@
 import * as mqtt from "mqtt"
 import WhitelistMqttRequest from "./WhitelistMqttRequest.js";
 import PGClient from "pg-native"
+import jwt from "jsonwebtoken"
 
 const db = new PGClient()
 db.connectSync(process.env.CONNECTION_STRING)
@@ -41,8 +42,17 @@ client.on('message', (topic, payload) => {
 
 mqttReq.response("v1/logging/read", payload => {
     payload = JSON.parse(payload)
+    const token = jwt.decode(payload.token, process.env.JWT_SECRET)
 
-    let query = "select id, topic, payload from public.logs order by id desc";
+    if (!token) {
+        return JSON.stringify({ httpStatus: 401, message: "Unauthorized" })
+    }
+
+    if (token.role !== "admin") {
+        return JSON.stringify({ httpStatus: 403, message: "Forbidden" })
+    }
+
+    let query = "select id, timestamp, topic, payload from public.logs order by id desc";
     let params = [];
 
     if (payload.offset) {

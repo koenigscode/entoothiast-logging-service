@@ -15,7 +15,7 @@ console.log(`Broker URL: ${process.env.BROKER_URL}`)
 
 client.on("connect", async () => {
     console.log("logging-service connected to broker")
-    client.subscribe("#", (err) => {
+    client.subscribe("$share/logging-service/#", (err) => {
         if (err) {
             console.log(err)
         }
@@ -40,7 +40,7 @@ client.on('message', (topic, payload) => {
 });
 
 
-mqttReq.response("v1/logging/read", payload => {
+mqttReq.response("$share/logging-service/v1/logging/read", payload => {
     payload = JSON.parse(payload)
     const token = jwt.decode(payload.token, process.env.JWT_SECRET)
 

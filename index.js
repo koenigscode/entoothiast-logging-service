@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken"
 const db = new PGClient()
 db.connectSync(process.env.CONNECTION_STRING)
 
-const client = mqtt.connect(process.env.BROKER_URL)
+const client = mqtt.connect(process.env.BROKER_URL, { clean: true })
 
 export const mqttReq = new WhitelistMqttRequest(client, ["v1/logging/read"]);
 
@@ -84,7 +84,7 @@ client.on("error", (error) => {
 });
 
 process.on('SIGINT', () => {
-    client.end();
+    client.end(); // since we're using a clean session, this unsubscribes from all topics
     console.log('Disconnected from MQTT broker');
     process.exit();
 });
